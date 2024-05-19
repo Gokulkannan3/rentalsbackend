@@ -94,7 +94,7 @@ app.post('/login', async (req, res) => {
                 bcryptjs.compare(password, result[0].password, (err, response) => {
                     if (response) {
                         const id = result[0].id;
-                        const token = jwt.sign({ id }, "secret", { expiresIn: '1h' });
+                        const token = jwt.sign({ id }, "success", { expiresIn: '1h' });
                         const userData = result[0];
                         res.json({ auth: true, token: token, result: userData, message: 'Login Successful' });
                     } else {
@@ -113,7 +113,7 @@ const verJWT = (req, res, next) => {
     if (!token) {
         res.send("We need token give it next time");
     } else {
-        jwt.verify(token, "secret", (err, decoded) => {
+        jwt.verify(token, "success", (err, decoded) => {
             if (err) {
                 res.json({ auth: false, message: "Failed to authenticate" });
             } else {
