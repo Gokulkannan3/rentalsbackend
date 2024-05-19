@@ -190,11 +190,11 @@ app.get('/ownern', (req, res) => {
 });
 
 app.post('/studentreq', (req, res) => {
-    const { name, category, contact, ownername } = req.body;
+    const { name, category, contact, ownername, ownercontact } = req.body;
 
     db.query(
-        'INSERT INTO studentenquire (name, category, contact, ownername) VALUES (?, ?, ?, ?)',
-        [name, category, contact, ownername],
+        'INSERT INTO studentenquire (name, category, contact, ownername, ownercontact) VALUES (?, ?, ?, ?, ?)',
+        [name, category, contact, ownername, ownercontact],
         (err, result) => {
             if (err) {
                 console.log(err);
@@ -213,6 +213,23 @@ app.get('/studentacc', (req, res) => {
     db.query(
         'SELECT * FROM studentenquire WHERE ownername = ?',
         [ownername],
+        (err, result) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({ error: 'Internal Server Error' });
+            } else {
+                res.status(200).json(result);
+            }
+        }
+    );
+});
+
+app.get('/studentaccept', (req, res) => {
+    const name = req.query.name;
+
+    db.query(
+        'SELECT * FROM studentenquire WHERE name = ?',
+        [name],
         (err, result) => {
             if (err) {
                 console.log(err);
