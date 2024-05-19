@@ -230,7 +230,7 @@ app.get('/studentacc', (req, res) => {
       return res.status(403).json({ auth: false, message: 'No token provided.' });
     }
   
-    jwt.verify(token, 'your_secret_key', (err, decoded) => {
+    jwt.verify(token, 'success', (err, decoded) => {
       if (err) {
         return res.status(500).json({ auth: false, message: 'Failed to authenticate token.' });
       }
