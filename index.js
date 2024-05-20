@@ -138,12 +138,12 @@ app.post('/owner', upload.fields([
     { name: 'bedroomtwo', maxCount: 1 },
     { name: 'toilettwo', maxCount: 1 }
 ]), (req, res) => {
-    const { name, contact, address, area, state, country, category } = req.body;
+    const { name, contact, address, area, state, country, category, amount } = req.body;
     const { hall, kitchen, bedroomone, toiletone, bedroomtwo, toilettwo } = req.files;
 
     db.query(
-        'INSERT INTO owner(name, contact, address, area, state, country, category, hall, kitchen, bedroomone, toiletone, bedroomtwo, toilettwo) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
-        [name, contact, address, area, state, country, category, hall[0].path, kitchen[0].path, bedroomone[0].path, toiletone[0].path, bedroomtwo[0].path, toilettwo[0].path],
+        'INSERT INTO owner(name, contact, address, area, state, country, category, hall, kitchen, bedroomone, toiletone, bedroomtwo, toilettwo, amount) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+        [name, contact, address, area, state, country, category, hall[0].path, kitchen[0].path, bedroomone[0].path, toiletone[0].path, bedroomtwo[0].path, toilettwo[0].path, amount],
         (err, result) => {
             if (err) {
                 console.log(err);
@@ -272,12 +272,8 @@ app.get('/studentaccept', (req, res) => {
     });
   }
 
-  // Assuming you have already set up your Express app and connected to your MySQL database
-
 app.delete('/api/enquiries/:id', (req, res) => {
     const enquiryId = req.params.id;
-
-    // Delete the row with the specified ID from the studentenquire table
     db.query(
         'DELETE FROM studentenquire WHERE id = ?',
         [enquiryId],
@@ -300,11 +296,6 @@ app.delete('/api/enquiries/:id', (req, res) => {
 });
 
 
-
-
-  
-  // Backend API to update the status of an enquiry to 'accepted'
-
 app.put('/api/enquiries/:id/accept', (req, res) => {
     const enquiryId = req.params.id;
 
@@ -322,6 +313,42 @@ app.put('/api/enquiries/:id/accept', (req, res) => {
         }
     );
 });
+
+app.get('/own/:name', (req, res) => {
+    const ownerName = req.params.name;
+    db.query(
+        'SELECT * FROM owner WHERE name=?',
+        [ownerName],
+        (err, result) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({ error: 'Internal Server Error' });
+            } else {
+                return res.status(200).json({ owners: result });
+            }
+        }
+    );
+});
+
+
+
+app.delete('/own/:id', (req, res) => {
+    const postId = req.params.id;
+    db.query(
+        'DELETE FROM owner WHERE id=?',
+        [postId],
+        (err, result) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({ error: 'Internal Server Error' });
+            } else {
+                return res.status(200).json({ message: 'Post deleted successfully' });
+            }
+        }
+    );
+});
+
+
 
 
 
