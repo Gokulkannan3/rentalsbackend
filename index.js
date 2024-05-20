@@ -27,7 +27,6 @@ app.use(session({
     }
 }));
 
-// Database connection setup
 const db = mysql.createConnection({
     user: 'avnadmin',
     password: 'AVNS_5W135YZrjuwuLR-WHt5',
@@ -189,6 +188,22 @@ app.get('/ownern', (req, res) => {
     );
 });
 
+app.get('/ownerp', (req, res) => {
+    db.query(
+        'SELECT * FROM owner WHERE category = ?',
+        ['Pg'],
+        (err, result) => {
+            if (err) {
+                console.log(err);
+                return res.status(500).json({ error: 'Internal Server Error' });
+            } else {
+                // Send the result containing BLOB data as response
+                res.status(200).json({ owners: result });
+            }
+        }
+    );
+});
+
 app.post('/studentreq', (req, res) => {
     const { name, category, contact, ownername, ownercontact } = req.body;
 
@@ -223,6 +238,7 @@ app.get('/studentacc', (req, res) => {
         }
     );
 });
+
 
 app.get('/studentaccept', (req, res) => {
     const name = req.query.name;
