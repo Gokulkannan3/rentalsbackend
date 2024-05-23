@@ -236,7 +236,7 @@ app.post('/studentreq', (req, res) => {
                     from: 'gokul8506@gmail.com',
                     to: ownermail,
                     subject: 'Enquiry Request',
-                    text: `Dear owner ${ownername}, you have received a request from the user ${name}😊\n\nUser Details\n${productDetails}`
+                    text: `Dear owner ${ownername}, you have received a request from the user ${name}😊\n\nUser Details\n${productDetails}\n\n\n\n\t\t\t'With regards Team Easy Homes 🏠'`
                 };
 
                 transporter.sendMail(mailOptions, (error, info) => {
