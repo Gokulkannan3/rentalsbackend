@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const nodemailer = require('nodemailer');
 const setRounds = 10;
 
 app.use(express.json());
@@ -137,24 +138,24 @@ app.post('/owner', upload.fields([
     { name: 'toiletone', maxCount: 1 },
     { name: 'bedroomtwo', maxCount: 1 },
     { name: 'toilettwo', maxCount: 1 }
-]), (req, res) => {
-    const { name, contact, address, area, state, country, category, amount } = req.body;
+  ]), (req, res) => {
+    const { name, contact, address, mail, area, state, country, category, amount } = req.body;
     const { hall, kitchen, bedroomone, toiletone, bedroomtwo, toilettwo } = req.files;
-
+  
     db.query(
-        'INSERT INTO owner(name, contact, address, area, state, country, category, hall, kitchen, bedroomone, toiletone, bedroomtwo, toilettwo, amount) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-        [name, contact, address, area, state, country, category, hall[0].path, kitchen[0].path, bedroomone[0].path, toiletone[0].path, bedroomtwo[0].path, toilettwo[0].path, amount],
-        (err, result) => {
-            if (err) {
-                console.log(err);
-                return res.status(500).json({ error: 'Internal Server Error' });
-            } else {
-                console.log(result);
-                return res.status(200).json({ message: 'Owner details inserted successfully' });
-            }
+      'INSERT INTO owner (name, contact, address, mail, area, state, country, category, hall, kitchen, bedroomone, toiletone, bedroomtwo, toilettwo, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [name, contact, address, mail, area, state, country, category, hall[0].path, kitchen[0].path, bedroomone[0].path, toiletone[0].path, bedroomtwo ? bedroomtwo[0].path : null, toilettwo ? toilettwo[0].path : null, amount],
+      (err, result) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: 'Internal Server Error' });
+        } else {
+          console.log(result);
+          return res.status(200).json({ message: 'Owner details inserted successfully' });
         }
+      }
     );
-});
+  });
 
 app.get('/owners', (req, res) => {
     db.query(
@@ -205,22 +206,53 @@ app.get('/ownerp', (req, res) => {
 });
 
 app.post('/studentreq', (req, res) => {
-    const { name, category, contact, ownername, ownercontact } = req.body;
+    const { name, category, contact, ownername, ownercontact, ownermail } = req.body;
 
     db.query(
-        'INSERT INTO studentenquire (name, category, contact, ownername, ownercontact) VALUES (?, ?, ?, ?, ?)',
-        [name, category, contact, ownername, ownercontact],
+        'INSERT INTO studentenquire (name, category, contact, ownername, ownercontact, ownermail) VALUES (?, ?, ?, ?, ?, ?)',
+        [name, category, contact, ownername, ownercontact, ownermail],
         (err, result) => {
             if (err) {
                 console.log(err);
                 return res.status(500).json({ error: 'Internal Server Error' });
             } else {
                 console.log(result);
-                return res.status(200).json({ message: 'Enquiry details inserted successfully' });
+                
+                const productDetails = `
+                    Name: ${name} 
+                    Contact: ${contact}
+                    Category: ${category}
+                `;
+
+                const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: 'gokul8506@gmail.com',
+                        pass: 'sdxw iyis bjhb gckg'
+                    }
+                });
+
+                const mailOptions = {
+                    from: 'gokul8506@gmail.com',
+                    to: ownermail,
+                    subject: 'Order Confirmation',
+                    text: `Dear owner ${ownername}, you have received a request from the user ${name}😊\n\nUser Details\n${productDetails}`
+                };
+
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.error('Error sending email:', error);
+                        return res.status(500).json({ error: 'Failed to send email' });
+                    } else {
+                        console.log('Email sent:', info.response);
+                        return res.status(200).json({ message: 'Enquiry details inserted successfully and email sent' });
+                    }
+                });
             }
         }
     );
 });
+
 
 app.get('/studentacc', (req, res) => {
     const ownername = req.query.ownername;
