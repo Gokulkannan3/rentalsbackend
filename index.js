@@ -235,7 +235,7 @@ app.post('/studentreq', (req, res) => {
                 const mailOptions = {
                     from: 'gokul8506@gmail.com',
                     to: ownermail,
-                    subject: 'Order Confirmation',
+                    subject: 'Enquiry Request',
                     text: `Dear owner ${ownername}, you have received a request from the user ${name}😊\n\nUser Details\n${productDetails}`
                 };
 
