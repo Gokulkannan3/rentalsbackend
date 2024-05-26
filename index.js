@@ -206,11 +206,11 @@ app.get('/ownerp', (req, res) => {
 });
 
 app.post('/studentreq', (req, res) => {
-    const { name, category, contact, ownername, ownercontact, ownermail } = req.body;
+    const { name, mail, category, contact, ownername, ownercontact, ownermail } = req.body;
 
     db.query(
-        'INSERT INTO studentenquire (name, category, contact, ownername, ownercontact, ownermail) VALUES (?, ?, ?, ?, ?, ?)',
-        [name, category, contact, ownername, ownercontact, ownermail],
+        'INSERT INTO studentenquire (name, mail, category, contact, ownername, ownercontact, ownermail) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [name, mail, category, contact, ownername, ownercontact, ownermail],
         (err, result) => {
             if (err) {
                 console.log(err);
@@ -220,6 +220,7 @@ app.post('/studentreq', (req, res) => {
                 
                 const productDetails = `
                     Name: ${name} 
+                    Email: ${mail}
                     Contact: ${contact}
                     Category: ${category}
                 `;
@@ -332,19 +333,51 @@ app.put('/api/enquiries/:id/accept', (req, res) => {
     const enquiryId = req.params.id;
 
     db.query(
-        'UPDATE studentenquire SET status = ? WHERE id = ?',
-        ['accepted', enquiryId],
-        (err, result) => {
-            if (err) {
-                console.log(err);
-                return res.status(500).json({ error: 'Internal Server Error' });
-            } else {
-                console.log(result);
-                return res.status(200).json({ message: 'Enquiry status updated to accepted' });
+        'SELECT * FROM studentenquire WHERE id = ?',
+        [enquiryId],
+        (err, results) => {
+            if (err || results.length === 0) {
+                return res.status(404).json({ error: 'Enquiry not found' });
             }
+
+            const enquiry = results[0];
+            const transporter = nodemailer.createTransport({
+                service: 'gmail',
+                auth: {
+                    user: 'gokul8506@gmail.com',
+                    pass: 'sdxw iyis bjhb gckg'
+                }
+            });
+
+            const mailOptions = {
+                from: 'gokul8506@gmail.com',
+                to: enquiry.mail,
+                subject: 'Enquiry Accepted',
+                text: `Dear User ${enquiry.name}, your enquiry request from ${enquiry.ownername} has been accepted. Details:\n\nName: ${enquiry.ownername}\nContact: ${enquiry.contact}\nCategory: ${enquiry.category}\n\nWith regards,\nTeam Easy Homes 🏠`
+            };
+
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.error('Error sending email:', error);
+                    return res.status(500).json({ error: 'Failed to send email' });
+                } else {
+                    console.log('Email sent:', info.response);
+                    db.query(
+                        'UPDATE studentenquire SET status = ? WHERE id = ?',
+                        ['accepted', enquiryId],
+                        (updateErr, updateResult) => {
+                            if (updateErr) {
+                                return res.status(500).json({ error: 'Failed to update enquiry status' });
+                            }
+                            return res.status(200).json({ message: 'Enquiry accepted and email sent' });
+                        }
+                    );
+                }
+            });
         }
     );
 });
+
 
 app.get('/own/:name', (req, res) => {
     const ownerName = req.params.name;
