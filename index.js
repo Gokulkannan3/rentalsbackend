@@ -353,7 +353,8 @@ app.put('/api/enquiries/:id/accept', (req, res) => {
                 from: 'gokul8506@gmail.com',
                 to: enquiry.mail,
                 subject: 'Enquiry Accepted',
-                text: `Dear User ${enquiry.name}, your enquiry request from ${enquiry.ownername} has been accepted. Details:\n\nName: ${enquiry.ownername}\nContact: ${enquiry.contact}\nCategory: ${enquiry.category}\n\nWith regards,\nTeam Easy Homes 🏠`
+                text: `Dear User ${enquiry.name}, your enquiry request from ${enquiry.ownername} has been accepted. 
+                \n\nDetails:\n\nName: ${enquiry.ownername}\nContact: ${enquiry.contact}\nCategory: ${enquiry.category}\n\nWith regards,\nTeam Easy Homes 🏠`
             };
 
             transporter.sendMail(mailOptions, (error, info) => {
