@@ -345,7 +345,7 @@ app.put('/api/enquiries/:id/accept', (req, res) => {
                 service: 'gmail',
                 auth: {
                     user: 'gokul8506@gmail.com',
-                    pass: 'sdxw iyis bjhb gckg'
+                    pass: 'tdmc ggvc itfc oagr'
                 }
             });
 
